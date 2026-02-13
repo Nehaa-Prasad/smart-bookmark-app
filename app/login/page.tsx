@@ -23,7 +23,7 @@ export default function LoginPage() {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "http://localhost:3000/login",
+        redirectTo: "https://smart-bookmark-app-chi-dusky.vercel.app/dashboard",
       },
     });
   };
