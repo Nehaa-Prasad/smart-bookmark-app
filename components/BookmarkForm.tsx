@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
 type Bookmark = {
   id: string;
@@ -13,7 +13,7 @@ type Bookmark = {
 type Props = {
   onAdd: (title: string, url: string) => void;
   editingBookmark: Bookmark | null;
-  setEditingBookmark: (bookmark: Bookmark | null) => void;
+  setEditingBookmark: (b: Bookmark | null) => void;
 };
 
 export default function BookmarkForm({
@@ -33,41 +33,49 @@ export default function BookmarkForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     onAdd(title, url);
-
     setTitle("");
     setUrl("");
+  };
+
+  const cancelEdit = () => {
     setEditingBookmark(null);
+    setTitle("");
+    setUrl("");
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="flex flex-col gap-4 mb-6"
-    >
+    <form onSubmit={handleSubmit} className="space-y-4 mb-8">
+
+      {/* TITLE INPUT */}
       <input
         type="text"
         placeholder="Bookmark Title"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
-        className="border p-3 rounded-lg"
-        required
+        className="w-full px-4 py-3 rounded-xl border border-gray-300 
+                   bg-white text-gray-900 placeholder-gray-400
+                   focus:outline-none focus:ring-2 focus:ring-black
+                   transition"
       />
 
+      {/* URL INPUT */}
       <input
         type="url"
         placeholder="Bookmark URL"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
-        className="border p-3 rounded-lg"
-        required
+        className="w-full px-4 py-3 rounded-xl border border-gray-300 
+                   bg-white text-gray-900 placeholder-gray-400
+                   focus:outline-none focus:ring-2 focus:ring-black
+                   transition"
       />
 
       <div className="flex gap-3">
         <button
           type="submit"
-          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+          className="bg-black text-white px-6 py-2 rounded-xl 
+                     hover:bg-gray-800 transition font-medium"
         >
           {editingBookmark ? "Update Bookmark" : "Add Bookmark"}
         </button>
@@ -75,12 +83,8 @@ export default function BookmarkForm({
         {editingBookmark && (
           <button
             type="button"
-            onClick={() => {
-              setEditingBookmark(null);
-              setTitle("");
-              setUrl("");
-            }}
-            className="bg-gray-300 px-4 py-2 rounded-lg"
+            onClick={cancelEdit}
+            className="bg-gray-200 px-6 py-2 rounded-xl hover:bg-gray-300 transition"
           >
             Cancel
           </button>
