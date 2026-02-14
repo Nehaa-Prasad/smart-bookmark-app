@@ -96,43 +96,19 @@ export default function DashboardPage() {
       .eq("id", editingBookmark.id);
 
     if (!error) {
-      setBookmarks((prev) =>
-        prev.map((b) =>
-          b.id === editingBookmark.id ? { ...b, title, url } : b
-        )
-      );
       setEditingBookmark(null);
     }
-
   } else {
-    // CREATE temporary bookmark (optimistic)
-    const tempBookmark: Bookmark = {
-      id: crypto.randomUUID(),
-      title,
-      url,
-      user_id: user.id,
-      created_at: new Date().toISOString(),
-    };
-
-    // Update UI instantly
-    setBookmarks((prev) => [tempBookmark, ...prev]);
-
-    const { error } = await supabase.from("bookmarks").insert([
+    await supabase.from("bookmarks").insert([
       {
         title,
         url,
         user_id: user.id,
       },
     ]);
-
-    if (error) {
-      // rollback if failed
-      setBookmarks((prev) =>
-        prev.filter((b) => b.id !== tempBookmark.id)
-      );
-    }
   }
 };
+
 
 
   const handleDelete = async (id: string) => {
