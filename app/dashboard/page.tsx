@@ -18,11 +18,14 @@ export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+  const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
       if (!session) {
         router.push("/login");
@@ -62,6 +65,14 @@ export default function DashboardPage() {
                 prev.filter((b) => b.id !== payload.old.id)
               );
             }
+
+            if (payload.eventType === "UPDATE") {
+              setBookmarks((prev) =>
+                prev.map((b) =>
+                  b.id === payload.new.id ? (payload.new as Bookmark) : b
+                )
+              );
+            }
           }
         )
         .subscribe();
@@ -74,29 +85,53 @@ export default function DashboardPage() {
     init();
   }, [router]);
 
+  // ADD or UPDATE
   const handleAdd = async (title: string, url: string) => {
-    await supabase.from("bookmarks").insert([
-      {
-        title,
-        url,
-        user_id: user.id,
-      },
-    ]);
+    if (!title || !url) return;
+
+    if (editingBookmark) {
+      // UPDATE MODE
+      const { error } = await supabase
+        .from("bookmarks")
+        .update({ title, url })
+        .eq("id", editingBookmark.id);
+
+      if (!error) {
+        setBookmarks((prev) =>
+          prev.map((b) =>
+            b.id === editingBookmark.id ? { ...b, title, url } : b
+          )
+        );
+        setEditingBookmark(null);
+      }
+    } else {
+      // ADD MODE
+      await supabase.from("bookmarks").insert([
+        {
+          title,
+          url,
+          user_id: user.id,
+        },
+      ]);
+    }
   };
 
-const handleDelete = async (id: string) => {
-  const { error } = await supabase
-    .from("bookmarks")
-    .delete()
-    .eq("id", id);
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from("bookmarks")
+      .delete()
+      .eq("id", id);
 
-  if (!error) {
-    setBookmarks((prev) =>
-      prev.filter((bookmark) => bookmark.id !== id)
-    );
-  }
-};
+    if (!error) {
+      setBookmarks((prev) =>
+        prev.filter((bookmark) => bookmark.id !== id)
+      );
+    }
+  };
 
+  const handleEdit = (bookmark: Bookmark) => {
+    setEditingBookmark(bookmark);
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -111,32 +146,39 @@ const handleDelete = async (id: string) => {
     );
   }
 
-return (
-  <main className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
-    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Smart Bookmark Dashboard
+            </h1>
+            <p className="text-sm text-gray-500">
+              Logged in as {user?.email}
+            </p>
+          </div>
 
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Smart Bookmark Dashboard
-          </h1>
-          <p className="text-sm text-gray-500">
-            Logged in as {user?.email}
-          </p>
+          <button
+            onClick={handleLogout}
+            className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+          >
+            Logout
+          </button>
         </div>
 
-        <button
-          onClick={handleLogout}
-          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-        >
-          Logout
-        </button>
+        <BookmarkForm
+          onAdd={handleAdd}
+          editingBookmark={editingBookmark}
+          setEditingBookmark={setEditingBookmark}
+        />
+
+        <BookmarkList
+          bookmarks={bookmarks}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
       </div>
-
-      <BookmarkForm onAdd={handleAdd} />
-      <BookmarkList bookmarks={bookmarks} onDelete={handleDelete} />
-
-    </div>
-  </main>
-);
+    </main>
+  );
 }
