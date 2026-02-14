@@ -84,9 +84,19 @@ export default function DashboardPage() {
     ]);
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("bookmarks").delete().eq("id", id);
-  };
+const handleDelete = async (id: string) => {
+  const { error } = await supabase
+    .from("bookmarks")
+    .delete()
+    .eq("id", id);
+
+  if (!error) {
+    setBookmarks((prev) =>
+      prev.filter((bookmark) => bookmark.id !== id)
+    );
+  }
+};
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
