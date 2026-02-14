@@ -187,9 +187,12 @@ export default function DashboardPage() {
             placeholder="Search bookmarks..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-5 py-3 rounded-xl border border-gray-300 
-                       focus:outline-none focus:ring-2 focus:ring-black 
-                       transition shadow-sm"
+            className="w-full px-5 py-3 rounded-xl 
+             border border-gray-300 
+             text-gray-900 placeholder-gray-400
+             bg-white
+             focus:outline-none focus:ring-2 focus:ring-black 
+             transition shadow-sm"
           />
         </div>
 
