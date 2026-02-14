@@ -87,29 +87,73 @@ export default function DashboardPage() {
 
   // ADD or UPDATE
   const handleAdd = async (title: string, url: string) => {
-    if (!title || !url) return;
+  if (!title || !url) return;
 
-    if (editingBookmark) {
-      await supabase
-        .from("bookmarks")
-        .update({ title, url })
-        .eq("id", editingBookmark.id);
+  if (editingBookmark) {
+    const { error } = await supabase
+      .from("bookmarks")
+      .update({ title, url })
+      .eq("id", editingBookmark.id);
 
+    if (!error) {
+      setBookmarks((prev) =>
+        prev.map((b) =>
+          b.id === editingBookmark.id ? { ...b, title, url } : b
+        )
+      );
       setEditingBookmark(null);
-    } else {
-      await supabase.from("bookmarks").insert([
-        {
-          title,
-          url,
-          user_id: user.id,
-        },
-      ]);
     }
-  };
+
+  } else {
+    // CREATE temporary bookmark (optimistic)
+    const tempBookmark: Bookmark = {
+      id: crypto.randomUUID(),
+      title,
+      url,
+      user_id: user.id,
+      created_at: new Date().toISOString(),
+    };
+
+    // Update UI instantly
+    setBookmarks((prev) => [tempBookmark, ...prev]);
+
+    const { error } = await supabase.from("bookmarks").insert([
+      {
+        title,
+        url,
+        user_id: user.id,
+      },
+    ]);
+
+    if (error) {
+      // rollback if failed
+      setBookmarks((prev) =>
+        prev.filter((b) => b.id !== tempBookmark.id)
+      );
+    }
+  }
+};
+
 
   const handleDelete = async (id: string) => {
-    await supabase.from("bookmarks").delete().eq("id", id);
-  };
+  // Optimistic remove
+  const previous = bookmarks;
+
+  setBookmarks((prev) =>
+    prev.filter((bookmark) => bookmark.id !== id)
+  );
+
+  const { error } = await supabase
+    .from("bookmarks")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    // rollback if failed
+    setBookmarks(previous);
+  }
+};
+
 
   const handleEdit = (bookmark: Bookmark) => {
     setEditingBookmark(bookmark);
