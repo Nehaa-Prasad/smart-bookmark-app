@@ -129,22 +129,22 @@ export default function DashboardPage() {
   }
 
   return (
-  <main className="min-h-screen bg-gradient-to-br from-indigo-100 via-white to-purple-100 p-6">
-    <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-md rounded-3xl shadow-xl p-10 border border-gray-200">
+  <main className="min-h-screen bg-gradient-to-br from-indigo-200 via-white to-purple-200 p-6">
+    <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-10">
 
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
             Smart Bookmark
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Logged in as <span className="font-medium">{user?.email}</span>
+          <p className="text-sm text-gray-600 mt-1">
+            Logged in as <span className="font-semibold text-gray-800">{user?.email}</span>
           </p>
         </div>
 
         <button
           onClick={handleLogout}
-          className="bg-black text-white px-5 py-2 rounded-xl hover:bg-gray-800 transition duration-200 shadow-sm"
+          className="bg-black text-white px-5 py-2 rounded-xl hover:bg-gray-800 transition duration-200 shadow-md"
         >
           Logout
         </button>
@@ -167,5 +167,4 @@ export default function DashboardPage() {
     </div>
   </main>
 );
-
 }
