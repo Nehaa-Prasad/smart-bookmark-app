@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
       setUser(session.user);
 
-      // Fetch bookmarks
+      // Initial fetch
       const { data } = await supabase
         .from("bookmarks")
         .select("*")
@@ -90,22 +90,13 @@ export default function DashboardPage() {
     if (!title || !url) return;
 
     if (editingBookmark) {
-      // UPDATE MODE
-      const { error } = await supabase
+      await supabase
         .from("bookmarks")
         .update({ title, url })
         .eq("id", editingBookmark.id);
 
-      if (!error) {
-        setBookmarks((prev) =>
-          prev.map((b) =>
-            b.id === editingBookmark.id ? { ...b, title, url } : b
-          )
-        );
-        setEditingBookmark(null);
-      }
+      setEditingBookmark(null);
     } else {
-      // ADD MODE
       await supabase.from("bookmarks").insert([
         {
           title,
@@ -117,16 +108,7 @@ export default function DashboardPage() {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase
-      .from("bookmarks")
-      .delete()
-      .eq("id", id);
-
-    if (!error) {
-      setBookmarks((prev) =>
-        prev.filter((bookmark) => bookmark.id !== id)
-      );
-    }
+    await supabase.from("bookmarks").delete().eq("id", id);
   };
 
   const handleEdit = (bookmark: Bookmark) => {
