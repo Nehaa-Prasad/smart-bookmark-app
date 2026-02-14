@@ -4,48 +4,62 @@ type Bookmark = {
   id: string;
   title: string;
   url: string;
+  user_id: string;
+  created_at: string;
 };
 
 type Props = {
   bookmarks: Bookmark[];
-  onDelete: (id: string) => void;
+  onDelete: (id: string) => Promise<void>;
+  onEdit: (bookmark: Bookmark) => void;
 };
 
-export default function BookmarkList({ bookmarks, onDelete }: Props) {
-  if (bookmarks.length === 0) {
-    return (
-      <div className="bg-white p-4 rounded-xl shadow text-center">
-        <p className="text-gray-500">
-          No bookmarks yet. Add your first one 🚀
-        </p>
-      </div>
-    );
-  }
-
+export default function BookmarkList({
+  bookmarks,
+  onDelete,
+  onEdit,
+}: Props) {
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
+      {bookmarks.length === 0 && (
+        <p className="text-gray-500 text-center">
+          No bookmarks yet.
+        </p>
+      )}
+
       {bookmarks.map((bookmark) => (
         <div
           key={bookmark.id}
-          className="bg-white p-4 rounded-xl shadow flex justify-between items-center"
+          className="flex justify-between items-center border p-4 rounded-xl shadow-sm"
         >
           <div>
-            <p className="font-semibold">{bookmark.title}</p>
+            <h3 className="font-semibold text-lg">
+              {bookmark.title}
+            </h3>
             <a
               href={bookmark.url}
               target="_blank"
-              className="text-blue-500 text-sm"
+              className="text-blue-600 text-sm"
             >
               {bookmark.url}
             </a>
           </div>
 
-          <button
-            onClick={() => onDelete(bookmark.id)}
-            className="text-red-500 font-medium"
-          >
-            Delete
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onEdit(bookmark)}
+              className="bg-yellow-400 px-3 py-1 rounded-lg text-sm"
+            >
+              Edit
+            </button>
+
+            <button
+              onClick={() => onDelete(bookmark.id)}
+              className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm"
+            >
+              Delete
+            </button>
+          </div>
         </div>
       ))}
     </div>
