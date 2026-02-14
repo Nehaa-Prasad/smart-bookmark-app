@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import BookmarkForm from "@/components/BookmarkForm";
+import BookmarkList from "@/components/BookmarkList";
 
 type Bookmark = {
-  id: number;
+  id: string;
   title: string;
   url: string;
   user_id: string;
@@ -17,14 +19,10 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
 
   useEffect(() => {
     const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
         router.push("/login");
@@ -33,7 +31,7 @@ export default function DashboardPage() {
 
       setUser(session.user);
 
-      // Fetch existing bookmarks
+      // Fetch bookmarks
       const { data } = await supabase
         .from("bookmarks")
         .select("*")
@@ -43,7 +41,7 @@ export default function DashboardPage() {
       setBookmarks(data || []);
       setLoading(false);
 
-      // 🔥 Realtime subscription
+      // Realtime subscription
       const channel = supabase
         .channel("realtime-bookmarks")
         .on(
@@ -76,9 +74,7 @@ export default function DashboardPage() {
     init();
   }, [router]);
 
-  const addBookmark = async () => {
-    if (!title || !url) return;
-
+  const handleAdd = async (title: string, url: string) => {
     await supabase.from("bookmarks").insert([
       {
         title,
@@ -86,97 +82,51 @@ export default function DashboardPage() {
         user_id: user.id,
       },
     ]);
-
-    setTitle("");
-    setUrl("");
   };
 
-  const deleteBookmark = async (id: number) => {
+  const handleDelete = async (id: string) => {
     await supabase.from("bookmarks").delete().eq("id", id);
   };
 
-  const logout = async () => {
+  const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push("/login");
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </main>
+    );
+  }
 
-  return (
-    <div style={{ padding: "40px" }}>
-      <h2>Welcome {user?.email}</h2>
+return (
+  <main className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 p-8">
+    <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
 
-      <button
-        onClick={logout}
-        style={{
-          padding: "8px 16px",
-          background: "black",
-          color: "white",
-          borderRadius: "6px",
-          marginBottom: "20px",
-        }}
-      >
-        Logout
-      </button>
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">
+            Smart Bookmark Dashboard
+          </h1>
+          <p className="text-sm text-gray-500">
+            Logged in as {user?.email}
+          </p>
+        </div>
 
-      <h3>Add Bookmark</h3>
+        <button
+          onClick={handleLogout}
+          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+        >
+          Logout
+        </button>
+      </div>
 
-      <input
-        type="text"
-        placeholder="Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        style={{ marginRight: "10px", padding: "8px" }}
-      />
+      <BookmarkForm onAdd={handleAdd} />
+      <BookmarkList bookmarks={bookmarks} onDelete={handleDelete} />
 
-      <input
-        type="text"
-        placeholder="URL"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        style={{ marginRight: "10px", padding: "8px" }}
-      />
-
-      <button
-        onClick={addBookmark}
-        style={{
-          padding: "8px 16px",
-          background: "black",
-          color: "white",
-          borderRadius: "6px",
-        }}
-      >
-        Add
-      </button>
-
-      <hr style={{ margin: "30px 0" }} />
-
-      <h3>Your Bookmarks</h3>
-
-      {bookmarks.length === 0 && <p>No bookmarks yet.</p>}
-
-      <ul>
-        {bookmarks.map((bookmark) => (
-          <li key={bookmark.id} style={{ marginBottom: "10px" }}>
-            <a href={bookmark.url} target="_blank">
-              {bookmark.title}
-            </a>
-
-            <button
-              onClick={() => deleteBookmark(bookmark.id)}
-              style={{
-                marginLeft: "10px",
-                background: "red",
-                color: "white",
-                borderRadius: "4px",
-                padding: "4px 8px",
-              }}
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-      </ul>
     </div>
-  );
+  </main>
+);
 }
