@@ -82,39 +82,84 @@ Incorrect import path / file naming mismatch between local and production.
 
 ---
 
-### 3️⃣ Duplicate Bookmarks Appearing
+### 3️⃣ Realtime Sync Not Updating UI
 **Problem:**  
-Bookmarks were added twice.
+Bookmarks were not reflecting immediately after insert/delete without refresh.
 
 **Cause:**  
-Using both:
-- Realtime subscription
-- Manual state update
+State was not being updated optimistically and realtime subscription logic was incomplete.
 
 **Solution:**  
-Removed manual state update for INSERT and relied only on Supabase Realtime.
+- Implemented Supabase Realtime subscription on `postgres_changes`
+- Added optimistic UI updates for DELETE
+- Ensured proper cleanup using `removeChannel`
 
 ---
 
-### 4️⃣ TypeScript Build Errors in Production
+### 4️⃣ Production Deployment Failed (Vercel Build Error)
 **Problem:**  
-Property mismatch errors (`onEdit`, component not a module).
+Deployment showed "Failed to compile" during `npm run build`.
 
 **Cause:**  
-Props were not properly defined in components.
+TypeScript strict mode detected prop mismatch between components.
 
 **Solution:**  
-Defined strict TypeScript types for all components.
+- Properly typed component props
+- Fixed `onEdit` and `onDelete` definitions
+- Tested locally with `npm run build` before redeploying
 
 ---
 
-### 5️⃣ UI Visibility Issues
+### 5️⃣ Environment Variables Not Working in Production
 **Problem:**  
-Input placeholders and text were too light and not visible.
+App worked locally but failed in production.
+
+**Cause:**  
+Supabase environment variables were not added in Vercel project settings.
 
 **Solution:**  
-Improved Tailwind styling:
-- Increased text contrast
-- Added better focus states
-- Improved shadows and spacing
+- Added `NEXT_PUBLIC_SUPABASE_URL`
+- Added `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- Triggered fresh redeploy
+
+---
+
+### 6️⃣ Duplicate Bookmark Entries
+**Problem:**  
+Bookmarks were appearing twice after adding.
+
+**Cause:**  
+Both manual state update and Supabase realtime listener were updating state.
+
+**Solution:**  
+Removed manual state update for INSERT and relied only on realtime subscription.
+
+---
+
+### 7️⃣ Strict TypeScript Errors Blocking Production
+**Problem:**  
+Type errors appeared during production build but not during development.
+
+**Cause:**  
+Next.js production build enforces stricter checks.
+
+**Solution:**  
+- Explicitly defined `Bookmark` type
+- Avoided implicit `any`
+- Ensured all component props were typed correctly
+
+---
+
+### 8️⃣ UI Visibility & Contrast Issues
+**Problem:**  
+Input text and placeholders were too light and not clearly visible.
+
+**Cause:**  
+Default Tailwind styles lacked sufficient contrast for the chosen background.
+
+**Solution:**  
+- Improved text contrast (`text-gray-900`)
+- Added proper placeholder styling
+- Refined shadows, spacing, and focus states
+
 
