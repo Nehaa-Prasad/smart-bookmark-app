@@ -20,45 +20,58 @@ export default function BookmarkList({
   onEdit,
 }: Props) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {bookmarks.length === 0 && (
-        <p className="text-gray-500 text-center">
-          No bookmarks yet.
-        </p>
+        <div className="text-center py-10 text-gray-500">
+          <p className="text-lg font-medium">No bookmarks yet</p>
+          <p className="text-sm mt-1">
+            Add your first bookmark to get started 🚀
+          </p>
+        </div>
       )}
 
       {bookmarks.map((bookmark) => (
         <div
           key={bookmark.id}
-          className="flex justify-between items-center border p-4 rounded-xl shadow-sm"
+          className="group bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:shadow-lg transition duration-300"
         >
-          <div>
-            <h3 className="font-semibold text-lg">
-              {bookmark.title}
-            </h3>
-            <a
-              href={bookmark.url}
-              target="_blank"
-              className="text-blue-600 text-sm"
-            >
-              {bookmark.url}
-            </a>
-          </div>
+          <div className="flex justify-between items-start gap-6">
+            {/* LEFT CONTENT */}
+            <div className="flex-1">
+              <h3 className="text-xl font-semibold text-gray-900 break-words">
+                {bookmark.title}
+              </h3>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => onEdit(bookmark)}
-              className="bg-yellow-400 px-3 py-1 rounded-lg text-sm"
-            >
-              Edit
-            </button>
+              <a
+                href={bookmark.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:underline break-all mt-2 inline-block"
+              >
+                {bookmark.url}
+              </a>
 
-            <button
-              onClick={() => onDelete(bookmark.id)}
-              className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm"
-            >
-              Delete
-            </button>
+              <p className="text-xs text-gray-400 mt-3">
+                Added on {new Date(bookmark.created_at).toLocaleDateString()}
+              </p>
+            </div>
+
+            {/* RIGHT ACTIONS */}
+            <div className="flex gap-3 opacity-90 group-hover:opacity-100 transition">
+              <button
+                onClick={() => onEdit(bookmark)}
+                className="bg-yellow-400 hover:bg-yellow-500 text-black px-4 py-2 rounded-xl text-sm font-medium transition"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() => onDelete(bookmark.id)}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       ))}
