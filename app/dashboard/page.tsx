@@ -129,41 +129,46 @@ export default function DashboardPage() {
   }
 
   return (
-  <main className="min-h-screen bg-gradient-to-br from-indigo-200 via-white to-purple-200 p-6">
-    <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-10">
+  <main className="min-h-screen bg-gradient-to-br from-slate-100 via-gray-200 to-slate-300 p-10">
+    <div className="max-w-3xl mx-auto bg-white/80 backdrop-blur-md rounded-3xl shadow-2xl p-10 border border-gray-200">
 
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-10">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
             Smart Bookmark
           </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Logged in as <span className="font-semibold text-gray-800">{user?.email}</span>
+            Logged in as{" "}
+            <span className="font-medium text-gray-800">
+              {user?.email}
+            </span>
           </p>
         </div>
 
         <button
           onClick={handleLogout}
-          className="bg-black text-white px-5 py-2 rounded-xl hover:bg-gray-800 transition duration-200 shadow-md"
+          className="bg-black text-white px-5 py-2 rounded-xl 
+                     hover:bg-gray-800 transition duration-200 
+                     shadow-md"
         >
           Logout
         </button>
       </div>
 
-      <div className="space-y-8">
-        <BookmarkForm
-          onAdd={handleAdd}
-          editingBookmark={editingBookmark}
-          setEditingBookmark={setEditingBookmark}
-        />
+      {/* FORM */}
+      <BookmarkForm
+        onAdd={handleAdd}
+        editingBookmark={editingBookmark}
+        setEditingBookmark={setEditingBookmark}
+      />
 
-        <BookmarkList
-          bookmarks={bookmarks}
-          onDelete={handleDelete}
-          onEdit={handleEdit}
-        />
-      </div>
-
+      {/* LIST */}
+      <BookmarkList
+        bookmarks={bookmarks}
+        onDelete={handleDelete}
+        onEdit={handleEdit}
+      />
     </div>
   </main>
 );
